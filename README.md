@@ -9,3 +9,9 @@
 5. Buka browser jalankan http://localhost:3000/posts, jika sudah maka muncul seperti ini
 
 ![image](https://user-images.githubusercontent.com/91459125/137577052-bdd0559b-cda6-469c-a53b-4fc2973c08b0.png)
+
+Demo on bisa dicek di https://clblogs.herokuapp.com/
+Login : admin@test.com
+Pass : 1234
+
+Untuk akses API Blog bisa ke link ini https://clblogs.herokuapp.com/postdata
