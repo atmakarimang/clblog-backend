@@ -9,94 +9,109 @@ var connection = require('../library/database');
  */
 router.get('/', function (req, res, next) {
     //query
-    connection.query('SELECT * FROM posts ORDER BY id desc', function (err, rows) {
-        if (err) {
-            req.flash('error', err);
-            res.render('posts', {
-                data: ''
-            });
-        } else {
-            //render ke view posts index
-            res.render('posts/index', {
-                data: rows // <-- data posts
-            });
-        }
-    }); 
+    if (req.session.loggedin) {
+        connection.query('SELECT * FROM posts ORDER BY id desc', function (err, rows) {
+            if (err) {
+                req.flash('error', err);
+                res.render('posts', {
+                    data: ''
+                });
+            } else {
+                //render ke view posts index
+                res.render('posts/index', {
+                    data: rows // <-- data posts
+                });
+            }
+        }); 
+    } else { 
+        req.flash('success', 'Please login first!');
+        res.redirect('/');
+    }
 });
 
 /**
  * CREATE POST
  */
  router.get('/create', function (req, res, next) {
-    res.render('posts/create', {
-        title: '',
-        slug: '',
-        content: ''
-    })
+    if (req.session.loggedin) {
+        res.render('posts/create', {
+            title: '',
+            slug: '',
+            content: ''
+        })
+    } else {
+        req.flash('success', 'Please login first!');
+        res.redirect('/');
+    }    
 })
 
 /**
  * STORE POST
  */
 router.post('/store', function (req, res, next) {
-    
-    let title   = req.body.title;
-    let slug    = req.body.slug;
-    let content = req.body.content;
-    let errors  = false;
 
-    if(title.length === 0) {
-        errors = true;
+    if (req.session.loggedin) {
+        let title   = req.body.title;
+        let slug    = req.body.slug;
+        let content = req.body.content;
+        let errors  = false;
 
-        // set flash message
-        req.flash('error', "Silahkan Masukkan Title");
-        // render to add.ejs with flash message
-        res.render('posts/create', {
-            title: title,
-            slug: slug,
-            content: content
-        })
-    }
+        if(title.length === 0) {
+            errors = true;
 
-    if(content.length === 0) {
-        errors = true;
-
-        // set flash message
-        req.flash('error', "Silahkan Masukkan Konten");
-        // render to add.ejs with flash message
-        res.render('posts/create', {
-            title: title,
-            slug: slug,
-            content: content
-        })
-    }
-
-    // if no error
-    if(!errors) {
-
-        let formData = {
-            title: title,
-            slug: slug,
-            content: content
+            // set flash message
+            req.flash('error', "Silahkan Masukkan Title");
+            // render to add.ejs with flash message
+            res.render('posts/create', {
+                title: title,
+                slug: slug,
+                content: content
+            })
         }
-        
-        // insert query
-        connection.query('INSERT INTO posts SET ?', formData, function(err, result) {
-            //if(err) throw err
-            if (err) {
-                req.flash('error', err)
-                 
-                // render to add.ejs
-                res.render('posts/create', {
-                    title: formData.title,
-                    slug: formData.slug,
-                    content: formData.content                    
-                })
-            } else {                
-                req.flash('success', 'Data Berhasil Disimpan!');
-                res.redirect('/posts');
+
+        if(content.length === 0) {
+            errors = true;
+
+            // set flash message
+            req.flash('error', "Silahkan Masukkan Konten");
+            // render to add.ejs with flash message
+            res.render('posts/create', {
+                title: title,
+                slug: slug,
+                content: content
+            })
+        }
+
+        // if no error
+        if(!errors) {
+
+            let formData = {
+                title: title,
+                slug: slug,
+                content: content
             }
-        })
+            
+            // insert query
+            connection.query('INSERT INTO posts SET ?', formData, function(err, result) {
+                //if(err) throw err
+                if (err) {
+                    req.flash('error', err)
+                    
+                    // render to add.ejs
+                    res.render('posts/create', {
+                        title: formData.title,
+                        slug: formData.slug,
+                        content: formData.content                    
+                    })
+                } else {                
+                    req.flash('success', 'Data Berhasil Disimpan!');
+                    res.redirect('/posts');
+                }
+            })
+        }
+    } else {
+        req.flash('success', 'Please login first!');
+        res.redirect('/');
     }
 
 }) 
@@ -106,27 +121,33 @@ router.post('/store', function (req, res, next) {
  */
  router.get('/edit/(:id)', function(req, res, next) {
 
-    let id = req.params.id;
-   
-    connection.query('SELECT * FROM posts WHERE id = ' + id, function(err, rows, fields) {
-        if(err) throw err
-         
-        // if user not found
-        if (rows.length <= 0) {
-            req.flash('error', 'Data Post Dengan ID ' + id + " Tidak Ditemukan")
-            res.redirect('/posts')
-        }
-        // if book found
-        else {
-            // render to edit.ejs
-            res.render('posts/edit', {
-                id:      rows[0].id,
-                title:   rows[0].title,
-                slug:    rows[0].slug,
-                content: rows[0].content
-            })
-        }
-    })
+    if (req.session.loggedin) {
+        let id = req.params.id;
+    
+        connection.query('SELECT * FROM posts WHERE id = ' + id, function(err, rows, fields) {
+            if(err) throw err
+            
+            // if user not found
+            if (rows.length <= 0) {
+                req.flash('error', 'Data Post Dengan ID ' + id + " Tidak Ditemukan")
+                res.redirect('/posts')
+            }
+            // if book found
+            else {
+                // render to edit.ejs
+                res.render('posts/edit', {
+                    id:      rows[0].id,
+                    title:   rows[0].title,
+                    slug:    rows[0].slug,
+                    content: rows[0].content
+                })
+            }
+        })
+    } else {
+        req.flash('success', 'Please login first!');
+        res.redirect('/');
+    }
+
 })
 
 /**
@@ -134,67 +155,72 @@ router.post('/store', function (req, res, next) {
  */
 router.post('/update/:id', function(req, res, next) {
 
-    let id      = req.params.id;
-    let title   = req.body.title;
-    let slug    = req.body.slug;
-    let content = req.body.content;
-    let errors  = false;
+    if (req.session.loggedin) {
+        let id      = req.params.id;
+        let title   = req.body.title;
+        let slug    = req.body.slug;
+        let content = req.body.content;
+        let errors  = false;
 
-    if(title.length === 0) {
-        errors = true;
+        if(title.length === 0) {
+            errors = true;
 
-        // set flash message
-        req.flash('error', "Silahkan Masukkan Title");
-        // render to edit.ejs with flash message
-        res.render('posts/edit', {
-            id:         req.params.id,
-            title:      title,
-            slug:       slug,
-            content:    content
-        })
-    }
-
-    if(content.length === 0) {
-        errors = true;
-
-        // set flash message
-        req.flash('error', "Silahkan Masukkan Konten");
-        // render to edit.ejs with flash message
-        res.render('posts/edit', {
-            id:         req.params.id,
-            title:      title,
-            slug:       slug,
-            content:    content
-        })
-    }
-
-    // if no error
-    if( !errors ) {   
- 
-        let formData = {
-            title: title,
-            slug: slug,
-            content: content
+            // set flash message
+            req.flash('error', "Silahkan Masukkan Title");
+            // render to edit.ejs with flash message
+            res.render('posts/edit', {
+                id:         req.params.id,
+                title:      title,
+                slug:       slug,
+                content:    content
+            })
         }
 
-        // update query
-        connection.query('UPDATE posts SET ? WHERE id = ' + id, formData, function(err, result) {
-            //if(err) throw err
-            if (err) {
-                // set flash message
-                req.flash('error', err)
-                // render to edit.ejs
-                res.render('posts/edit', {
-                    id:     req.params.id,
-                    name:   formData.name,
-                    author: formData.author
-                })
-            } else {
-                req.flash('success', 'Data Berhasil Diupdate!');
-                res.redirect('/posts');
+        if(content.length === 0) {
+            errors = true;
+
+            // set flash message
+            req.flash('error', "Silahkan Masukkan Konten");
+            // render to edit.ejs with flash message
+            res.render('posts/edit', {
+                id:         req.params.id,
+                title:      title,
+                slug:       slug,
+                content:    content
+            })
+        }
+
+        // if no error
+        if( !errors ) {   
+    
+            let formData = {
+                title: title,
+                slug: slug,
+                content: content
             }
-        })
-    }
+
+            // update query
+            connection.query('UPDATE posts SET ? WHERE id = ' + id, formData, function(err, result) {
+                //if(err) throw err
+                if (err) {
+                    // set flash message
+                    req.flash('error', err)
+                    // render to edit.ejs
+                    res.render('posts/edit', {
+                        id:     req.params.id,
+                        name:   formData.name,
+                        author: formData.author
+                    })
+                } else {
+                    req.flash('success', 'Data Berhasil Diupdate!');
+                    res.redirect('/posts');
+                }
+            })
+        }
+    } else {
+        req.flash('success', 'Please login first!');
+        res.redirect('/');
+    }    
 })
 
 /**
@@ -202,22 +228,27 @@ router.post('/update/:id', function(req, res, next) {
  */
  router.get('/delete/(:id)', function(req, res, next) {
 
-    let id = req.params.id;
-     
-    connection.query('DELETE FROM posts WHERE id = ' + id, function(err, result) {
-        //if(err) throw err
-        if (err) {
-            // set flash message
-            req.flash('error', err)
-            // redirect to posts page
-            res.redirect('/posts')
-        } else {
-            // set flash message
-            req.flash('success', 'Data Berhasil Dihapus!')
-            // redirect to posts page
-            res.redirect('/posts')
-        }
-    })
+    if (req.session.loggedin) {
+        let id = req.params.id;
+        
+        connection.query('DELETE FROM posts WHERE id = ' + id, function(err, result) {
+            //if(err) throw err
+            if (err) {
+                // set flash message
+                req.flash('error', err)
+                // redirect to posts page
+                res.redirect('/posts')
+            } else {
+                // set flash message
+                req.flash('success', 'Data Berhasil Dihapus!')
+                // redirect to posts page
+                res.redirect('/posts')
+            }
+        })
+    } else {
+        req.flash('success', 'Please login first!');
+        res.redirect('/');
+    }    
 })
 
 module.exports = router;

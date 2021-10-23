@@ -1,10 +1,16 @@
 let mysql = require('mysql');
 
 let connection = mysql.createConnection({
-   host:        'localhost',
-   user:        'root',
-   password:    '',
-   database:    'blogku'
+   host:        'us-cdbr-east-04.cleardb.com',
+   user:        'b5ddbae2a8a48e',
+   password:    'ff94308d',
+   database:    'heroku_aa22c342d637c67'
+
+  //  host:        'localhost',
+  //  port:        '3307', 
+  //  user:        'root',
+  //  password:    '',
+  //  database:    'blogku'
  });
 
 connection.connect(function(error){
@@ -15,14 +21,4 @@ connection.connect(function(error){
    }
  })
 
-module.exports = connection; 
-
-/*
-module.exports = {
-  multipleStatements  : true,
-  host                : 'localhost',
-  user                : 'root',
-  password            : '',
-  database            : 'blogku'
-};
-*/
+module.exports = connection;  

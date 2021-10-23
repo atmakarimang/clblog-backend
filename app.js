@@ -12,6 +12,7 @@ var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
 var usersRouter = require('./routes/users');
 var postsRouter = require('./routes/posts'); // <-- route posts
+var appRoute 	= require('./routes'); // <-- route server api mengambil dari routes.js
 
 var app = express();
 
@@ -23,11 +24,11 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); 
 
 app.use(session({ 
   cookie: { 
-    maxAge: 60000 
+    maxAge: 1200000 //milliseconds Sama dengan 20 menit 
   },
   store: new session.MemoryStore,
   saveUninitialized: true,
@@ -39,55 +40,7 @@ app.use(flash())
 
 //app.use('/', indexRouter);
 app.use('/',loginRouter);
-const appRoute = require('./routes'); 
 app.use('/', appRoute); 
-
-//Login
-/*  
-var connection = require('./library/database'); 
-app.post('/auth', function(request, response) {
-	var username = request.body.username;
-	var password = request.body.password;
-	if (username && password) {
-		connection.query('SELECT * FROM accounts WHERE username = ? AND password = ?', [username, password], function(error, results, fields) {
-			if (results.length > 0) {
-				request.session.loggedin = true;
-				request.session.username = username;
-				response.redirect('/posts');
-			} else {
-				response.send('Incorrect Username and/or Password!');
-			}			
-			response.end();
-		});
-	} else {
-		response.send('Please enter Username and Password!');
-		response.end();
-	}
-});
-
-//app.get('/posts', function(request, response) {
-	if (request.session.loggedin) {
-		//response.send('Welcome back, ' + request.session.username + '!');
-    app.use('/posts', postsRouter);
-	} else {
-		response.redirect('/'); 
-	}
-	response.end(); 
-//});
-
-app.get('/logout', function(request, response) {
-	if (request.session.loggedin) {
-		request.session.loggedin = false; 
-    response.redirect('/'); 
-	} else {
-    response.redirect('/');
-		//response.send('Please login to view this page!');
-	}
-	response.end();
-}); 
-*/ 
-
-app.use('/users', usersRouter);
 app.use('/posts', postsRouter); // use route posts di Express
 
 // catch 404 and forward to error handler
