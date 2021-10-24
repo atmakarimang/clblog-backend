@@ -40,7 +40,7 @@ app.use(flash())
 
 //app.use('/', indexRouter);
 app.use('/',loginRouter);
-app.use('/', appRoute); 
+//app.use('/', appRoute); 
 app.use('/posts', postsRouter); // use route posts di Express
 
 // catch 404 and forward to error handler
